@@ -7,29 +7,24 @@
 [![Quality Score][ico-code-quality]][link-code-quality]
 [![Total Downloads][ico-downloads]][link-downloads]
 
-**Note:** Replace ```Polder Knowledge``` ```polderknowledge``` ```https://polderknowledge.com``` ```wij@polderknowledge.nl``` ```polderknowledge``` ```pktool``` ```A tool to quickly setup applications and libraries.``` with their correct values in [README.md](README.md), [CHANGELOG.md](CHANGELOG.md), [CONTRIBUTING.md](CONTRIBUTING.md), [LICENSE.md](LICENSE.md) and [composer.json](composer.json) files, then delete this line. You can run `$ php prefill.php` in the command line to make all replacements at once. Delete the file prefill.php as well.
-
-This is where your description should go. Try and limit it to a paragraph or two, and maybe throw in a mention of what
-PSRs you support to avoid any confusion with users and contributors.
+A tool to execute common development tasks such as creating new applications or libraries.
 
 ## Install
 
-Via Composer
+Download the following files:
 
-``` bash
-$ composer require polderknowledge/pktool
-```
+- https://polderknowledge.github.io/pktool/pktool.phar
+- https://polderknowledge.github.io/pktool/pktool.phar.pubkey
 
-## Usage
+You will need to download both files, to the same directory, for the utility to work; additionally, the name of the 
+key must not be changed. Once downloaded, make the the PHAR file executable.
 
-``` php
-$skeleton = new PolderKnowledge\PkTool();
-echo $skeleton->echoPhrase('Hello, League!');
-```
+**Pro-Tip:** Put both files in a directory that is on your $PATH. Than create the alias *pktool* to the phar so you 
+can easily execute it from anywhere on your system.
 
 ## Change log
 
-Please see [CHANGELOG](CHANGELOG.md) for more information what has changed recently.
+Please see [CHANGELOG.md](CHANGELOG.md) for more information what has changed recently.
 
 ## Testing
 
@@ -39,11 +34,17 @@ $ composer test
 
 ## Contributing
 
-Please see [CONTRIBUTING](CONTRIBUTING.md) and [CONDUCT](CONDUCT.md) for details.
+Please see [CONTRIBUTING.md](CONTRIBUTING.md) and [CONDUCT.md](CONDUCT.md) for details.
 
 ## Security
 
-If you discover any security related issues, please email wij@polderknowledge.nl instead of using the issue tracker.
+If you discover any security related issues, please report them via [HackerOne](https://hackerone.com/polderknowledge) 
+instead of using the issue tracker or e-mail.
+
+## Community
+
+We have an IRC channel where you can find us every now and then. We're on the Freenode network in the
+channel #polderknowledge.
 
 ## Credits
 
