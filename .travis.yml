@@ -15,7 +15,13 @@ cache:
 matrix:
   include:
   - php: 5.6
-    env: COMPOSER_FLAGS="--prefer-stable --prefer-lowest"
+    env:
+    - EXECUTE_DEPLOYMENT=true
+    - COMPOSER_FLAGS="--prefer-stable --prefer-lowest"
+
+before_install:
+- openssl aes-256-cbc -K $encrypted_3fa200ce5c41_key -iv $encrypted_3fa200ce5c41_iv
+  -in .travis/secrets.tar.enc -out .travis/secrets.tar -d
 
 before_script:
 - travis_retry composer self-update
@@ -32,6 +38,6 @@ after_script:
     php ocular.phar code-coverage:upload --format=php-clover coverage.clover
   fi
 
-before_install:
-- openssl aes-256-cbc -K $encrypted_3fa200ce5c41_key -iv $encrypted_3fa200ce5c41_iv
-  -in .travis/secrets.tar.enc -out .travis/secrets.tar -d
+after_success:
+- if [[ $EXECUTE_DEPLOYMENT == 'true' && $TRAVIS_BRANCH == 'master' && $TRAVIS_PULL_REQUEST == 'false' ]]; then composer install --no-dev ; fi
+- if [[ $EXECUTE_DEPLOYMENT == 'true' && $TRAVIS_BRANCH == 'master' && $TRAVIS_PULL_REQUEST == 'false' ]]; then ./bin/deploy.sh ; fi
