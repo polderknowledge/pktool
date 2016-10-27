@@ -22,7 +22,7 @@ final class Website extends Question
 
         $this->stripOffSlash = false;
 
-        $this->setValidator(function($value) {
+        $this->setValidator(function ($value) {
             if (!$value) {
                 throw new RuntimeException('No value provided.');
             }

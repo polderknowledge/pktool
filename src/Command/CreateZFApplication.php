@@ -114,21 +114,21 @@ final class CreateZFApplication extends AbstractCommand
 
     private function askApplicationOrganization()
     {
-        return function(Container $container) {
+        return function (Container $container) {
             return new Value('Organization name: ', false);
         };
     }
 
     private function askApplicationWebsite()
     {
-        return function(Container $container) {
+        return function (Container $container) {
             return new Website('Organization website: ', false);
         };
     }
 
     private function askApplicationRepository()
     {
-        return function(Container $container) {
+        return function (Container $container) {
             $question = new Website('Repository URL: ', false);
             $question->setStripOffSlash(true);
 
@@ -138,21 +138,21 @@ final class CreateZFApplication extends AbstractCommand
 
     private function askApplicationName()
     {
-        return function(Container $container) {
+        return function (Container $container) {
             return new Value('Application name: ', false);
         };
     }
 
     private function askApplicationDescription()
     {
-        return function(Container $container) {
+        return function (Container $container) {
             return new Value('Application description: ', false);
         };
     }
 
     private function askPackageNamespace()
     {
-        return function(Container $container) {
+        return function (Container $container) {
             $applicationName = $container->getVariable('app_name');
             $organization = $container->getVariable('org_name');
 
@@ -166,7 +166,7 @@ final class CreateZFApplication extends AbstractCommand
 
     private function askPackageVendor()
     {
-        return function(Container $container) {
+        return function (Container $container) {
             $organization = $container->getVariable('org_name');
             $packageVendor = preg_replace('/[^a-z0-9]+/', '', strtolower($organization));
 
@@ -176,7 +176,7 @@ final class CreateZFApplication extends AbstractCommand
 
     private function askPackageName()
     {
-        return function(Container $container) {
+        return function (Container $container) {
             $applicationName = $container->getVariable('app_name');
             $packageName = preg_replace('/[^a-z0-9]+/', '-', strtolower($applicationName));
 
@@ -186,7 +186,7 @@ final class CreateZFApplication extends AbstractCommand
 
     private function askPackageLicense()
     {
-        return function(Container $container) {
+        return function (Container $container) {
             return new ChoiceQuestion('Package license: ', [
                 'proprietary',
                 'MIT',

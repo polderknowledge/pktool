@@ -18,7 +18,7 @@ final class Value extends Question
     {
         parent::__construct($question, $default);
 
-        $this->setValidator(function($value) {
+        $this->setValidator(function ($value) {
             if (!$value) {
                 throw new RuntimeException('No value provided.');
             }
