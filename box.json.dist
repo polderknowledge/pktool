@@ -1,8 +1,11 @@
 {
+    "algorithm": "OPENSSL",
     "chmod": "0755",
     "compression": "GZ",
     "directories": [
-        "src"
+        "config",
+        "src",
+        "resources"
     ],
     "files": [
         "LICENSE.md"
@@ -19,6 +22,7 @@
     ],
     "git-version": "package_version",
     "intercept": true,
+    "key": ".travis/phar-private.pem",
     "main": "bin/pktool",
     "output": "pktool.phar",
     "stub": true

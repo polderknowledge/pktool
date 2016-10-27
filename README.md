@@ -47,6 +47,7 @@ channel #polderknowledge.
 ## Credits
 
 - [Polder Knowledge][link-author]
+- [Matthew Weier O'Phinney for describing 'Secure PHAR Automation'](https://mwop.net/blog/2015-12-14-secure-phar-automation.html)
 - [All Contributors][link-contributors]
 
 ## License

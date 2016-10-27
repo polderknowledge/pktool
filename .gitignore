@@ -1,2 +1,7 @@
+.travis/phar-private.pem
+box.json
 build/
+pktool.phar
+pktool.phar.pubkey
+pktool.phar.version
 vendor/
