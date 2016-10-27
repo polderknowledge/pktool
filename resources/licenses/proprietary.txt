@@ -1,0 +1,1 @@
+Copyright (c) {YEAR} {APP_NAME}. All rights reserved.

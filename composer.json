@@ -1,6 +1,6 @@
 {
     "name": "polderknowledge/pktool",
-    "type": "application",
+    "type": "project",
     "description": "A tool to quickly setup applications and libraries.",
     "keywords": [
         "polderknowledge",
