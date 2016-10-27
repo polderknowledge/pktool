@@ -25,14 +25,6 @@ final class Application extends BaseApplication
 
     public function doRun(InputInterface $input, OutputInterface $output)
     {
-        if ($this->checkNewerVersion()) {
-            $output->writeln(sprintf(
-                '<error>%s</error>',
-                'A new version of PkTool is available, run `pktool self-update` to update to the latest version.'
-            ));
-            $output->writeln('');
-        }
-
         $oldWorkingDir = getcwd();
         $newWorkingDir = $this->getNewWorkingDir($input);
 
@@ -70,16 +62,5 @@ final class Application extends BaseApplication
         }
 
         return $workingDir;
-    }
-
-    private function checkNewerVersion()
-    {
-        if (self::VERSION === '@' . 'package_version' . '@') {
-            return true;
-        }
-
-        $content = humbug_get_contents('https://polderknowledge.github.io/pktool/pktool.phar.version');
-
-        return substr($content, 0, 40) !== self::VERSION;
     }
 }
