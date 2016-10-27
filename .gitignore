@@ -5,3 +5,5 @@ pktool.phar
 pktool.phar.pubkey
 pktool.phar.version
 vendor/
+.travis/build-key.pem
+.travis/secrets.tar
