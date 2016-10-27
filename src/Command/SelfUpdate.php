@@ -53,8 +53,15 @@ final class SelfUpdate extends AbstractCommand
 
         try {
             if ($input->getOption('rollback')) {
+                $output->writeln('Rolling back to previous version...');
                 $result = $updater->rollback();
             } else {
+                if (!$updater->hasUpdate()) {
+                    $output->writeln('No new version available.');
+                    return 0;
+                }
+
+                $output->writeln('Updating to newer version...');
                 $result = $updater->update();
             }
 
