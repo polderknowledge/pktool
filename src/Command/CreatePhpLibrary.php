@@ -19,9 +19,9 @@ use Symfony\Component\Finder\Finder;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Process\Process;
 
-final class CreateZFApplication extends AbstractCommand
+final class CreatePhpLibrary extends AbstractCommand
 {
-    const REPOSITORY_URL = 'https://github.com/polderknowledge/skeleton-zf-application';
+    const REPOSITORY_URL = 'https://github.com/polderknowledge/skeleton-php-library';
 
     /**
      * @var array
@@ -30,8 +30,8 @@ final class CreateZFApplication extends AbstractCommand
 
     protected function configure()
     {
-        $this->setName('create-zf-application');
-        $this->setDescription('Creates a new Zend Framework application.');
+        $this->setName('create-php-library');
+        $this->setDescription('Creates a new PHP library.');
 
         $this->licenses = [
             'proprietary' => __DIR__ . '/../../resources/licenses/proprietary.txt',
@@ -61,20 +61,23 @@ final class CreateZFApplication extends AbstractCommand
     private function replaceVariables(InputInterface $input, OutputInterface $output)
     {
         $container = new Container($this->getHelper('question'));
-        $container->add('org_name', $this->askApplicationOrganization());
-        $container->add('app_name', $this->askApplicationName());
-        $container->add('app_description', $this->askApplicationDescription());
-        $container->add('app_website', $this->askApplicationWebsite());
-        $container->add('app_repository', $this->askApplicationRepository());
-        $container->add('package_vendor', $this->askPackageVendor());
-        $container->add('package_name', $this->askPackageName());
-        $container->add('package_namespace', $this->askPackageNamespace());
+        $container->add('name', $this->askName());
+        $container->add('description', $this->askDescription());
+        $container->add('repository', $this->askRepository());
         $container->add('license', $this->askPackageLicense());
 
         $values = $container->ask($input, $output);
 
         // Static values:
+        $values['organization'] = 'Polder Knowledge';
+        $values['org_email'] = 'wij@polderknowledge.nl';
+        $values['package_name'] = preg_replace('/[^a-z0-9]+/', '-', strtolower($values['name']));
+        $values['package_vendor'] = 'polderknowledge';
+        $values['website'] = 'https://polderknowledge.com';
         $values['year'] = date('Y');
+        $values['namespace_package'] = str_replace(' ', '', ucwords($values['name']));
+        $values['namespace'] = 'PolderKnowledge\\\\' . $values['namespace_package'];
+        $values['app_name'] = $values['organization']; // used in the license file.
 
         $output->writeln('');
         $output->writeln('<info>Replacing variables in cloned repository...</info>');
@@ -102,7 +105,17 @@ final class CreateZFApplication extends AbstractCommand
             $contents = str_replace('{' . strtoupper($variable) . '}', $value, $contents);
         }
 
+        $contents = $this->replaceNamespaceInFile($contents, $values, $path);
+
         file_put_contents($path, $contents);
+    }
+
+    private function replaceNamespaceInFile($contents, array $values, $path)
+    {
+        $namespaceToReplace = 'namespace PolderKnowledge\\Skeleton;';
+        $namespaceToSet = 'namespace PolderKnowledge\\' . $values['namespace_package'] . ';';
+
+        return str_replace($namespaceToReplace, $namespaceToSet, $contents);
     }
 
     private function updateLicenseFile($path, $license)
@@ -112,75 +125,17 @@ final class CreateZFApplication extends AbstractCommand
         file_put_contents($path, $contents);
     }
 
-    private function askApplicationOrganization()
+    private function askName()
     {
         return function (Container $container) {
-            return new Value('Organization name: ', false);
+            return new Value('Package name: ', false);
         };
     }
 
-    private function askApplicationWebsite()
+    private function askDescription()
     {
         return function (Container $container) {
-            return new Website('Organization website: ', false);
-        };
-    }
-
-    private function askApplicationRepository()
-    {
-        return function (Container $container) {
-            $question = new Website('Repository URL: ', false);
-            $question->setStripOffSlash(true);
-
-            return $question;
-        };
-    }
-
-    private function askApplicationName()
-    {
-        return function (Container $container) {
-            return new Value('Application name: ', false);
-        };
-    }
-
-    private function askApplicationDescription()
-    {
-        return function (Container $container) {
-            return new Value('Application description: ', false);
-        };
-    }
-
-    private function askPackageNamespace()
-    {
-        return function (Container $container) {
-            $applicationName = $container->getVariable('app_name');
-            $organization = $container->getVariable('org_name');
-
-            $namespace = str_replace(' ', '', ucwords($organization));
-            $namespace .= '\\';
-            $namespace .= str_replace(' ', '', ucwords($applicationName));
-
-            return new Value('Application namespace (' . $namespace . '): ', $namespace);
-        };
-    }
-
-    private function askPackageVendor()
-    {
-        return function (Container $container) {
-            $organization = $container->getVariable('org_name');
-            $packageVendor = preg_replace('/[^a-z0-9]+/', '', strtolower($organization));
-
-            return new Value('Package vendor (' . $packageVendor . '): ', $packageVendor);
-        };
-    }
-
-    private function askPackageName()
-    {
-        return function (Container $container) {
-            $applicationName = $container->getVariable('app_name');
-            $packageName = preg_replace('/[^a-z0-9]+/', '-', strtolower($applicationName));
-
-            return new Value('Package name (' . $packageName . '): ', $packageName);
+            return new Value('Package description: ', false);
         };
     }
 
@@ -188,6 +143,19 @@ final class CreateZFApplication extends AbstractCommand
     {
         return function (Container $container) {
             return new ChoiceQuestion('Package license: ', array_keys($this->licenses));
+        };
+    }
+
+    private function askRepository()
+    {
+        return function (Container $container) {
+            $url = 'https://github.com/polderknowledge/' .
+                preg_replace('/[^a-z0-9]+/', '-', strtolower($container->getVariable('name')));
+
+            $question = new Website('Repository URL (' . $url . '): ', $url);
+            $question->setStripOffSlash(true);
+
+            return $question;
         };
     }
 }

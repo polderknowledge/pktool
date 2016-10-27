@@ -14,6 +14,7 @@ use Zend\ServiceManager\Factory\InvokableFactory;
 return [
     'factories' => [
         Application::class => Service\ApplicationFactory::class,
+        Command\CreatePhpLibrary::class => InvokableFactory::class,
         Command\CreateZFApplication::class => InvokableFactory::class,
         Command\SelfUpdate::class => InvokableFactory::class,
     ],
