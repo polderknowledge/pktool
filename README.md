@@ -20,6 +20,16 @@ key must not be changed. Once downloaded, make the the PHAR file executable.
 **Pro-Tip:** Put both files in a directory that is on your $PATH. Than create the alias *pktool* to the phar so you 
 can easily execute it from anywhere on your system.
 
+## Run with Docker
+
+We provide a docker image for this repository at [docker hub](https://hub.docker.com/r/polderknowledge/pktool/).
+
+The working directory in the container is mounted at `/data`. And the container will automatically change the owner of 
+the created project to the owner of the working directory.
+
+To run the container:
+`docker run --rm -it -v $(pwd):/data polderknowledge/pktool`
+
 ## Change log
 
 Please see [CHANGELOG.md](CHANGELOG.md) for more information what has changed recently.
