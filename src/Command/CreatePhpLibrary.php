@@ -13,6 +13,7 @@ use PolderKnowledge\PkTool\Question\Container;
 use PolderKnowledge\PkTool\Question\Value;
 use PolderKnowledge\PkTool\Question\Website;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ChoiceQuestion;
 use Symfony\Component\Finder\Finder;
@@ -32,6 +33,13 @@ final class CreatePhpLibrary extends AbstractCommand
     {
         $this->setName('create-php-library');
         $this->setDescription('Creates a new PHP library.');
+        $this->addOption(
+            'source',
+            null,
+            InputOption::VALUE_OPTIONAL,
+            'Define the source repository',
+            self::REPOSITORY_URL
+        );
 
         $this->licenses = [
             'proprietary' => __DIR__ . '/../../resources/licenses/proprietary.txt',
@@ -43,9 +51,11 @@ final class CreatePhpLibrary extends AbstractCommand
     {
         $targetDirectory = '.';
 
-        $output->writeln(sprintf('<info>Cloning %s</info>', self::REPOSITORY_URL));
+        $source = $input->getOption('source');
 
-        $process = new Process(sprintf('git clone %s %s', self::REPOSITORY_URL, $targetDirectory));
+        $output->writeln(sprintf('<info>Cloning %s</info>', $source));
+
+        $process = new Process(sprintf('git clone %s %s', $source, $targetDirectory));
         $process->run(function ($type, $buffer) use ($output) {
             $output->writeln($buffer);
         });
