@@ -83,7 +83,7 @@ final class CreateZFApplication extends AbstractCommand
         $this->updateLicenseFile('LICENSE.md', $values['license']);
 
         $finder = new Finder();
-        $finder->files()->in(getcwd());
+        $finder->files()->ignoreDotFiles(false)->in(getcwd());
 
         foreach ($finder as $file) {
             $this->replaceVariablesInFile($values, $file->getRealPath());
