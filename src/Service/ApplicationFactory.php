@@ -11,6 +11,7 @@ namespace PolderKnowledge\PkTool\Service;
 
 use Interop\Container\ContainerInterface;
 use PolderKnowledge\PkTool\Application;
+use PolderKnowledge\PkTool\Command\CreateApigilityApplication;
 use PolderKnowledge\PkTool\Command\CreatePhpLibrary;
 use PolderKnowledge\PkTool\Command\CreateZFApplication;
 use PolderKnowledge\PkTool\Command\SelfUpdate;
@@ -21,6 +22,7 @@ final class ApplicationFactory implements FactoryInterface
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {
         $application = new Application();
+        $application->add($container->get(CreateApigilityApplication::class));
         $application->add($container->get(CreatePhpLibrary::class));
         $application->add($container->get(CreateZFApplication::class));
         $application->add($container->get(SelfUpdate::class));
