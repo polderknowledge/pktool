@@ -10,75 +10,37 @@
 namespace PolderKnowledge\PkTool\Command;
 
 use PolderKnowledge\PkTool\Question\Container;
-use PolderKnowledge\PkTool\Question\Value;
 use PolderKnowledge\PkTool\Question\Website;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
-use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Question\ChoiceQuestion;
-use Symfony\Component\Finder\Finder;
-use Symfony\Component\Process\Exception\ProcessFailedException;
-use Symfony\Component\Process\Process;
 
-final class CreatePhpLibrary extends AbstractCommand
+final class CreatePhpLibrary extends AbstractCreateCommand
 {
     const REPOSITORY_URL = 'https://github.com/polderknowledge/skeleton-php-library';
 
-    /**
-     * @var array
-     */
-    private $licenses;
-
     protected function configure()
     {
+        parent::configure();
+
         $this->setName('create-php-library');
         $this->setDescription('Creates a new PHP library.');
-        $this->addOption(
-            'source',
-            null,
-            InputOption::VALUE_OPTIONAL,
-            'Define the source repository',
-            self::REPOSITORY_URL
-        );
-
-        $this->licenses = [
-            'proprietary' => __DIR__ . '/../../resources/licenses/proprietary.txt',
-            'MIT' => __DIR__ . '/../../resources/licenses/mit.txt',
-        ];
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function getDefaultRepository()
     {
-        $targetDirectory = '.';
-
-        $source = $input->getOption('source');
-
-        $output->writeln(sprintf('<info>Cloning %s</info>', $source));
-
-        $process = new Process(sprintf('git clone %s %s', $source, $targetDirectory));
-        $process->run(function ($type, $buffer) use ($output) {
-            $output->writeln($buffer);
-        });
-
-        if (!$process->isSuccessful()) {
-            throw new ProcessFailedException($process);
-        }
-
-        return $this->replaceVariables($input, $output);
+        return self::REPOSITORY_URL;
     }
 
-
-    private function replaceVariables(InputInterface $input, OutputInterface $output)
+    protected function populateQuestionContainer(Container $container)
     {
-        $container = new Container($this->getHelper('question'));
-        $container->add('name', $this->askName());
-        $container->add('description', $this->askDescription());
+        $container->addValueQuestion('name', 'Package name: ');
+        $container->addValueQuestion('description', 'Package description: ');
         $container->add('repository', $this->askRepository());
-        $container->add('license', $this->askPackageLicense());
+        $container->addChoiceQuestion('license', 'Package license: ', array_keys($this->licenses));
+    }
 
-        $values = $container->ask($input, $output);
+    protected function populateVariableArray(array $values)
+    {
+        $values = parent::populateVariableArray($values);
 
-        // Static values:
         $values['organization'] = 'Polder Knowledge';
         $values['org_email'] = 'wij@polderknowledge.nl';
         $values['package_name'] = preg_replace('/[^a-z0-9]+/', '-', strtolower($values['name']));
@@ -89,35 +51,16 @@ final class CreatePhpLibrary extends AbstractCommand
         $values['namespace'] = 'PolderKnowledge\\\\' . $values['namespace_package'];
         $values['app_name'] = $values['organization']; // used in the license file.
 
-        $output->writeln('');
-        $output->writeln('<info>Replacing variables in cloned repository...</info>');
-        $output->writeln('');
-
-        $this->updateLicenseFile('LICENSE.md', $values['license']);
-
-        $finder = new Finder();
-        $finder->files()->ignoreDotFiles(false)->in(getcwd());
-
-        foreach ($finder as $file) {
-            $this->replaceVariablesInFile($values, $file->getRealPath());
-        }
-
-        $output->writeln('<info>Done!</info>');
-
-        return 0;
+        return $values;
     }
 
-    private function replaceVariablesInFile(array $values, $path)
+    protected function replaceFileContent($path, $content, array $variables)
     {
-        $contents = file_get_contents($path);
+        $content = parent::replaceFileContent($path, $content, $variables);
 
-        foreach ($values as $variable => $value) {
-            $contents = str_replace('{' . strtoupper($variable) . '}', $value, $contents);
-        }
+        $content = $this->replaceNamespaceInFile($content, $variables, $path);
 
-        $contents = $this->replaceNamespaceInFile($contents, $values, $path);
-
-        file_put_contents($path, $contents);
+        return $content;
     }
 
     private function replaceNamespaceInFile($contents, array $values, $path)
@@ -126,34 +69,6 @@ final class CreatePhpLibrary extends AbstractCommand
         $namespaceToSet = 'namespace PolderKnowledge\\' . $values['namespace_package'] . ';';
 
         return str_replace($namespaceToReplace, $namespaceToSet, $contents);
-    }
-
-    private function updateLicenseFile($path, $license)
-    {
-        $contents = file_get_contents($this->licenses[$license]);
-
-        file_put_contents($path, $contents);
-    }
-
-    private function askName()
-    {
-        return function (Container $container) {
-            return new Value('Package name: ', false);
-        };
-    }
-
-    private function askDescription()
-    {
-        return function (Container $container) {
-            return new Value('Package description: ', false);
-        };
-    }
-
-    private function askPackageLicense()
-    {
-        return function (Container $container) {
-            return new ChoiceQuestion('Package license: ', array_keys($this->licenses));
-        };
     }
 
     private function askRepository()
