@@ -66,6 +66,8 @@ abstract class AbstractCreateCommand extends AbstractCommand
 
         $this->cloneRepository($targetDirectory, $input->getOption('source'), $output);
 
+        FileSystem::removeDirectory(rtrim($targetDirectory, '/') . '/.git/');
+
         $this->replaceVariables($targetDirectory, $input, $output);
 
         $output->writeln('<info>Done!</info>');
