@@ -122,7 +122,7 @@ abstract class AbstractCreateCommand extends AbstractCommand
     protected function replaceFileContent(SplFileInfo $file, $content, array $variables)
     {
         if ($file->getBasename() === 'LICENSE.md') {
-            $this->updateLicenseFile($file->getRealPath(), $variables['license']);
+            $content = $this->updateLicenseFile($variables['license']);
         }
 
         foreach ($variables as $variable => $value) {
@@ -132,19 +132,13 @@ abstract class AbstractCreateCommand extends AbstractCommand
         return $content;
     }
 
-    private function updateLicenseFile($path, $license)
+    private function updateLicenseFile($license)
     {
-        if (!is_file($path)) {
-            return;
-        }
-
         if (!array_key_exists($license, $this->licenses)) {
             throw new RuntimeException(sprintf('License "%s" not found', $license));
         }
 
-        $contents = file_get_contents($this->licenses[$license]);
-
-        file_put_contents($path, $contents);
+        return file_get_contents($this->licenses[$license]);
     }
 
     /**
