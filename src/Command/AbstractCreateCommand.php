@@ -10,11 +10,14 @@
 namespace PolderKnowledge\PkTool\Command;
 
 use PolderKnowledge\PkTool\Question\Container;
+use PolderKnowledge\PkTool\Utils\FileSystem;
 use RuntimeException;
+use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Finder\Finder;
+use Symfony\Component\Finder\SplFileInfo;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Process\Process;
 
@@ -37,6 +40,13 @@ abstract class AbstractCreateCommand extends AbstractCommand
             $this->getDefaultRepository()
         );
 
+        $this->addArgument(
+            'target-directory',
+            InputArgument::OPTIONAL,
+            'The directory to store the created project',
+            getcwd()
+        );
+
         $this->licenses = [
             'proprietary' => __DIR__ . '/../../resources/licenses/proprietary.txt',
             'MIT' => __DIR__ . '/../../resources/licenses/mit.txt',
@@ -45,21 +55,26 @@ abstract class AbstractCreateCommand extends AbstractCommand
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $this->cloneRepository($input, $output);
+        $targetDirectory = $input->getArgument('target-directory');
 
-        $this->replaceVariables($input, $output);
+        if (is_dir($targetDirectory) && !FileSystem::isDirectoryEmpty($targetDirectory)) {
+            $targetDirectory = realpath($targetDirectory);
+            throw new RuntimeException(sprintf('The target directory "%s" is not empty.', $targetDirectory));
+        } elseif (!is_dir($targetDirectory)) {
+            FileSystem::createDirectory($targetDirectory);
+        }
+
+        $this->cloneRepository($targetDirectory, $input->getOption('source'), $output);
+
+        $this->replaceVariables($targetDirectory, $input, $output);
 
         $output->writeln('<info>Done!</info>');
 
         return 0;
     }
 
-    protected function cloneRepository(InputInterface $input, OutputInterface $output)
+    protected function cloneRepository($targetDirectory, $source, OutputInterface $output)
     {
-        $targetDirectory = getcwd();
-
-        $source = $input->getOption('source');
-
         $output->writeln(sprintf('<info>Cloning %s</info>', $source));
 
         $process = new Process(sprintf('git clone %s %s', $source, $targetDirectory));
@@ -72,44 +87,44 @@ abstract class AbstractCreateCommand extends AbstractCommand
         }
     }
 
-    private function replaceVariables(InputInterface $input, OutputInterface $output)
+    private function replaceVariables($targetDirectory, InputInterface $input, OutputInterface $output)
     {
         $container = new Container($this->getHelper('question'));
         $this->populateQuestionContainer($container);
 
-        $values = $container->ask($input, $output);
-        $values = $this->populateVariableArray($values);
+        $variables = $container->ask($input, $output);
+        $variables = $this->populateVariableArray($variables);
 
         $output->writeln('');
         $output->writeln('<info>Replacing variables in cloned repository...</info>');
         $output->writeln('');
 
-        $this->updateLicenseFile('LICENSE.md', $values['license']);
-
-        $finder = $this->getFileFinder();
-        $this->replaceVariablesInFinder($finder, $values);
+        $finder = $this->getFileFinder($targetDirectory);
+        $this->replaceVariablesInFinder($finder, $variables);
     }
 
-    private function replaceVariablesInFinder(Finder $finder, array $values)
+    private function replaceVariablesInFinder(Finder $finder, array $variables)
     {
-        $finder = $this->getFileFinder();
-
         foreach ($finder as $file) {
-            $this->replaceFile($values, $file->getRealPath());
+            $this->replaceFile($variables, $file);
         }
     }
 
-    private function replaceFile(array $variables, $path)
+    private function replaceFile(array $variables, SplFileInfo $file)
     {
-        $contents = file_get_contents($path);
+        $contents = file_get_contents($file->getRealPath());
 
-        $contents = $this->replaceFileContent($path, $contents, $variables);
+        $contents = $this->replaceFileContent($file, $contents, $variables);
 
-        file_put_contents($path, $contents);
+        file_put_contents($file, $contents);
     }
 
-    protected function replaceFileContent($path, $content, array $variables)
+    protected function replaceFileContent(SplFileInfo $file, $content, array $variables)
     {
+        if ($file->getBasename() === 'LICENSE.md') {
+            $content = $this->updateLicenseFile($variables['license']);
+        }
+
         foreach ($variables as $variable => $value) {
             $content = str_replace('{' . strtoupper($variable) . '}', $value, $content);
         }
@@ -117,19 +132,13 @@ abstract class AbstractCreateCommand extends AbstractCommand
         return $content;
     }
 
-    private function updateLicenseFile($path, $license)
+    private function updateLicenseFile($license)
     {
-        if (!is_file($path)) {
-            return;
-        }
-
         if (!array_key_exists($license, $this->licenses)) {
             throw new RuntimeException(sprintf('License "%s" not found', $license));
         }
 
-        $contents = file_get_contents($this->licenses[$license]);
-
-        file_put_contents($path, $contents);
+        return file_get_contents($this->licenses[$license]);
     }
 
     /**
@@ -162,12 +171,14 @@ abstract class AbstractCreateCommand extends AbstractCommand
     /**
      * Creates a new instance of a Finder which is used to find the files to replace variables in.
      *
+     * @param string $targetDirectory The path to search files in.
      * @return Finder
      */
-    protected function getFileFinder()
+    protected function getFileFinder($targetDirectory)
     {
         $finder = new Finder();
-        $finder->files()->ignoreDotFiles(false)->in(getcwd());
+
+        $finder->files()->ignoreDotFiles(false)->in(realpath($targetDirectory));
 
         return $finder;
     }
