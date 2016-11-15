@@ -11,6 +11,7 @@ namespace PolderKnowledge\PkTool\Command;
 
 use PolderKnowledge\PkTool\Question\Container;
 use PolderKnowledge\PkTool\Question\Website;
+use Symfony\Component\Finder\SplFileInfo;
 
 final class CreatePhpLibrary extends AbstractCreateCommand
 {
@@ -54,16 +55,16 @@ final class CreatePhpLibrary extends AbstractCreateCommand
         return $values;
     }
 
-    protected function replaceFileContent($path, $content, array $variables)
+    protected function replaceFileContent(SplFileInfo $file, $content, array $variables)
     {
-        $content = parent::replaceFileContent($path, $content, $variables);
+        $content = parent::replaceFileContent($file, $content, $variables);
 
-        $content = $this->replaceNamespaceInFile($content, $variables, $path);
+        $content = $this->replaceNamespaceInFile($content, $variables);
 
         return $content;
     }
 
-    private function replaceNamespaceInFile($contents, array $values, $path)
+    private function replaceNamespaceInFile($contents, array $values)
     {
         $namespaceToReplace = 'namespace PolderKnowledge\\Skeleton;';
         $namespaceToSet = 'namespace PolderKnowledge\\' . $values['namespace_package'] . ';';
