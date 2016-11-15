@@ -41,6 +41,10 @@ final class FileSystem
 
     public static function removeDirectory($path)
     {
+        if (!is_dir($path)) {
+            return;
+        }
+
         $iterator = new RecursiveIteratorIterator(
             new RecursiveDirectoryIterator(
                 $path,
