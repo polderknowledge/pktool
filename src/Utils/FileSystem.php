@@ -10,6 +10,10 @@
 namespace PolderKnowledge\PkTool\Utils;
 
 use DirectoryIterator;
+use FilesystemIterator;
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
+use SplFileInfo;
 
 final class FileSystem
 {
@@ -33,5 +37,31 @@ final class FileSystem
         if (!is_dir($path)) {
             mkdir($path, 0755, true);
         }
+    }
+
+    public static function removeDirectory($path)
+    {
+        if (!is_dir($path)) {
+            return;
+        }
+
+        $iterator = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator(
+                $path,
+                FilesystemIterator::SKIP_DOTS | FilesystemIterator::UNIX_PATHS
+            ),
+            RecursiveIteratorIterator::CHILD_FIRST
+        );
+
+        /** @var SplFileInfo $entry */
+        foreach ($iterator as $entry) {
+            if ($entry->isDir()) {
+                rmdir($entry->getPathname());
+            } else {
+                unlink($entry->getPathname());
+            }
+        }
+
+        rmdir($path);
     }
 }
