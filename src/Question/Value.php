@@ -14,7 +14,7 @@ use Symfony\Component\Console\Question\Question;
 
 final class Value extends Question
 {
-    public function __construct($question, $default)
+    public function __construct($question, $default = null)
     {
         parent::__construct($question, $default);
 

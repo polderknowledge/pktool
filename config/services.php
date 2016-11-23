@@ -18,5 +18,6 @@ return [
         Command\CreatePhpLibrary::class => InvokableFactory::class,
         Command\CreateZFApplication::class => InvokableFactory::class,
         Command\SelfUpdate::class => InvokableFactory::class,
+        Command\UpdatePhpLibrary::class => InvokableFactory::class,
     ],
 ];
