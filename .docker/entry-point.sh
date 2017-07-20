@@ -1,18 +1,24 @@
 #!/bin/sh -e
+
+# Stop on errors
 set -e
 
-# Set the apache user and group to match the host user.
+# The user and group that is currently executing
 OWNER=$(stat -c '%u' /data)
 GROUP=$(stat -c '%g' /data)
+
+# When the owner is not root, let's create a user in the container
 if [ "$OWNER" != "0" ]; then
-  deluser pktool
-  addgroup -g ${GROUP} pktool
-  adduser -u ${OWNER} -G pktool -D pktool
-  chown -R pktool:pktool /data
+    deluser pktool
+    addgroup --gid ${GROUP} pktool
+    adduser --uid ${OWNER} --no-create-home --disabled-password --ingroup pktool --gecos pktool pktool
+    chown -R pktool:pktool /data
 fi
 
 echo The composer user and group has been set to the following:
+
 id pktool
 
 cd /data
-su-exec pktool php /usr/local/pktool/bin/pktool $@
+
+php /usr/local/pktool/bin/pktool $@
