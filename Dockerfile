@@ -30,7 +30,7 @@ RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" \
  && php -r "unlink('composer-setup.php');" \
  && mv composer.phar /usr/local/bin/composer \
  && composer self-update \
- && chown pktool:pktool /usr/local/bin/composer
+ && chown pktool:pktool /usr/local/bin/composer \
  && composer install --no-dev -o
 
 # The directory to work from.
