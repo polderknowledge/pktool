@@ -9,9 +9,9 @@
 
 namespace PolderKnowledge\PkToolTest;
 
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 
-class ApplicationTest extends PHPUnit_Framework_TestCase
+class ApplicationTest extends TestCase
 {
     /**
      * Test that true does in fact equal true
