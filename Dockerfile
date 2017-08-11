@@ -33,7 +33,7 @@ RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" \
  && chown pktool:pktool /usr/local/bin/composer
 
 # The directory to work from.
-WORKDIR /data
+WORKDIR /usr/local/pktool
 
 # Install Composer dependencies
 RUN composer install --no-dev -o
