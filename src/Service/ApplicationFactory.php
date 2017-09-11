@@ -15,6 +15,7 @@ use PolderKnowledge\PkTool\Command\CreateApigilityApplication;
 use PolderKnowledge\PkTool\Command\CreatePhpLibrary;
 use PolderKnowledge\PkTool\Command\CreateZFApplication;
 use PolderKnowledge\PkTool\Command\SelfUpdate;
+use PolderKnowledge\PkTool\Command\UpdatePhpLibrary;
 use Zend\ServiceManager\Factory\FactoryInterface;
 
 final class ApplicationFactory implements FactoryInterface
@@ -26,6 +27,7 @@ final class ApplicationFactory implements FactoryInterface
         $application->add($container->get(CreatePhpLibrary::class));
         $application->add($container->get(CreateZFApplication::class));
         $application->add($container->get(SelfUpdate::class));
+        $application->add($container->get(UpdatePhpLibrary::class));
 
         return $application;
     }
